@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:todo_list_sqlite/helpers/drawer_navigation.dart';
 import 'package:todo_list_sqlite/models/Category.dart';
 import 'package:todo_list_sqlite/screens/home_screen.dart';
 import 'package:todo_list_sqlite/services/category_service.dart';
@@ -50,8 +49,16 @@ class _CategoryScreenState extends State<CategoryScreen> {
                   _category.description = _categoryDescriptionController.text;
                   var result = await _categoryService.save(_category);
                   if(result != null){
+                    _categoryNameController.text = '';
+                    _categoryDescriptionController.text = '';
                     Navigator.pop(context);
-                    getAllCategories();
+                    setState(() {
+                      var cat = Category();
+                      cat.name = _category.name;
+                      cat.id = result;
+                      cat.description = _category.description;
+                      _categoryList.add(cat);
+                    });
                   }
                 }, child: Text("Save")),
                 TextButton(onPressed: () {
@@ -94,7 +101,13 @@ class _CategoryScreenState extends State<CategoryScreen> {
                   var result = await _categoryService.update(_category);
                   if(result != null){
                     Navigator.pop(context);
-                    getAllCategories();
+                    _categoryList.asMap().forEach((index, element) {
+                      if(element.id == _category.id){
+                        setState(() {
+                          _categoryList[index] = _category;
+                        });
+                      }
+                    });
                   }
                 }, child: Text("Update")),
                 TextButton(onPressed: () {
@@ -123,7 +136,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
         });
   }
 
-  _showDeleteDialog(BuildContext context, category) {
+  _showDeleteDialog(BuildContext context, index) {
     return showDialog(
         context: context,
         barrierDismissible: true,
@@ -131,11 +144,13 @@ class _CategoryScreenState extends State<CategoryScreen> {
           return AlertDialog(
               actions: <Widget>[
                 TextButton(onPressed: () async {
-                  var result =  await _categoryService.destroy(category);
+                  var result =  await _categoryService.destroy(_categoryList[index].id);
                   if(result > 0){
-                    Navigator.pop(context);
+                    setState(() {
+                      _categoryList.removeAt(index);
+                    });
                   }
-                  getAllCategories();
+                  Navigator.pop(context);
                 }, child: Text("Delete", style: TextStyle(color: Colors.white),), style: TextButton.styleFrom(
                   backgroundColor: Colors.red
                 ),),
@@ -188,7 +203,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
               children: <Widget>[
                 Text(_categoryList[index].name),
                 IconButton(icon: Icon(Icons.delete), onPressed: () async{
-                  _deleteCategory(context, _categoryList[index].id);
+                  _deleteCategory(context, index);
                 })
               ],
             )
