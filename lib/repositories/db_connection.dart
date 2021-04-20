@@ -7,8 +7,8 @@ class DBConnection{
    setDatabase() async
   {
     var directory = await getApplicationDocumentsDirectory();
-    var path = join(directory.path, 'sqflite_todos');
-    var database = openDatabase(path, version: 1, onCreate: _onCreatingDatabase);
+    var path = join(directory.path, 'mi_todo');
+    var database = await openDatabase(path, version: 1, onCreate: _onCreatingDatabase);
     return database;
   }
 

@@ -10,6 +10,22 @@ class CategoryService{
   }
   save(Category category) async
   {
-    _repository.save("categories", category.categoryMap());
+   return await _repository.save("categories", category.categoryMap());
+  }
+
+  getCategories() async{
+    return await _repository.getAll('categories');
+  }
+
+  getSingleCategory(categoryId) async{
+    return await _repository.get('categories', categoryId);
+  }
+
+  update(Category category) async{
+    return await _repository.update("categories", category.categoryMap());
+  }
+
+  destroy(int id) async{
+    return await _repository.destroy("categories", id);
   }
 }
